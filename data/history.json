@@ -1,0 +1,16 @@
+{
+  "resolved": [
+    {"number": "INC0897", "short_description": "checkout-api 500s after release", "resolution_category": "code-defect",
+     "resolution_notes": "NPE in OrderValidator introduced by deploy 2026-03-02; hotfix PR #4411 rolled forward.", "closed_at": "2026-03-02"},
+    {"number": "INC0912", "short_description": "payments-api capture timeouts", "resolution_category": "dependency-api-failure",
+     "resolution_notes": "Upstream acquiring gateway degraded; vendor incident VND-2231. Added retry budget + alert.", "closed_at": "2026-04-11"},
+    {"number": "INC0933", "short_description": "checkout latency p95 spike during sale", "resolution_category": "capacity",
+     "resolution_notes": "HPA maxed; raised max replicas and node pool.", "closed_at": "2026-05-14"},
+    {"number": "INC0951", "short_description": "search-api wrong results after config push", "resolution_category": "config",
+     "resolution_notes": "Bad synonyms file; reverted config map.", "closed_at": "2026-05-30"},
+    {"number": "INC0968", "short_description": "orders stuck in queue, consumer lag", "resolution_category": "infrastructure",
+     "resolution_notes": "Kafka broker disk pressure; rebalanced.", "closed_at": "2026-06-12"},
+    {"number": "INC0980", "short_description": "checkout 500 on null shipping address", "resolution_category": "code-defect",
+     "resolution_notes": "Missing null guard in address mapper; fixed in PR #4788.", "closed_at": "2026-06-25"}
+  ]
+}

@@ -1,0 +1,44 @@
+# Production template. CI/CD renders this per environment (e.g. envsubst,
+# Helm values, or Kustomize) and flips individual keys via TRIAGE__ env vars.
+# SECRETS ARE NEVER PUT IN THIS FILE - only the NAMES of env vars.
+data_dir: data            # still used for changes/history feeds
+output_dir: out
+source_dir: sample_service
+gates:
+  label_min_confidence: 0.5
+  fix_min_confidence: 0.8
+  sev1_assist_only: true
+cluster:
+  window_minutes: 30
+llm:
+  mode: real
+  api_key_env: ANTHROPIC_API_KEY
+  summary_model: claude-haiku-4-5-20251001
+  diagnosis_model: claude-sonnet-4-6
+adapters:
+  tickets: servicenow
+  logs: gcp_logging
+  metrics: gcp_monitoring
+  fix_publisher: github
+  settings:
+    servicenow:
+      instance_url: https://YOURDEV.service-now.com
+      username_env: SN_USERNAME
+      password_env: SN_PASSWORD
+      query: state=1
+      write_custom_fields: false   # true after u_agent_* fields exist
+    gcp:
+      project_id: your-gcp-project
+      access_token_env: GCP_TOKEN   # local testing; on GCP uses metadata server
+      filter_template: 'resource.labels.container_name="{service}" AND severity>=ERROR AND timestamp>="{start}"'
+    github:
+      owner: your-org
+      repo: your-sandbox-repo
+      token_env: GITHUB_TOKEN
+      mode: pr                      # or "issue" for least privilege
+webhook:
+  host: 0.0.0.0
+  port: 8080
+  hmac_secret_env: TRIAGE_WEBHOOK_SECRET
+  debounce_seconds: 90
+  idempotency_file: out/processed.json

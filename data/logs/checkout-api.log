@@ -1,0 +1,14 @@
+2026-07-11 09:03:14 INFO  [checkout-api] v2026.07.11-3 started, gift_message module loaded
+2026-07-11 09:08:52 INFO  [checkout-api] POST /orders 201 order=ord_5511 latency=41ms
+2026-07-11 09:11:03 ERROR [checkout-api] POST /orders 500 order=ord_5523 user=cust_881 card=4111 1111 1111 1111 email=jane.doe@example.com
+java.lang.NullPointerException: Cannot invoke "String.trim()" because "giftMessage" is null
+    at com.shop.checkout.GiftMessageMapper.map(GiftMessageMapper.java:42)
+    at com.shop.checkout.OrderService.submit(OrderService.java:118)
+2026-07-11 09:11:47 ERROR [checkout-api] POST /orders 500 order=ord_5524
+java.lang.NullPointerException: Cannot invoke "String.trim()" because "giftMessage" is null
+    at com.shop.checkout.GiftMessageMapper.map(GiftMessageMapper.java:42)
+2026-07-11 09:12:30 ERROR [checkout-api] POST /orders 500 order=ord_5526 (same trace, suppressed)
+2026-07-11 09:13:02 INFO  [checkout-api] POST /orders 201 order=ord_5527 latency=44ms gift_message=present
+2026-07-11 09:14:11 ERROR [checkout-api] POST /orders 500 order=ord_5529
+java.lang.NullPointerException: Cannot invoke "String.trim()" because "giftMessage" is null
+    at com.shop.checkout.GiftMessageMapper.map(GiftMessageMapper.java:42)

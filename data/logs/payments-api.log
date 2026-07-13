@@ -1,0 +1,6 @@
+2026-07-11 08:52:10 INFO  [payments-api] capture ok txn=t_9911 acquirer=gw.acquirer-example.com latency=180ms
+2026-07-11 08:56:33 ERROR [payments-api] capture FAILED txn=t_9923 upstream=gw.acquirer-example.com status=504 latency=30012ms
+2026-07-11 08:58:01 ERROR [payments-api] capture FAILED txn=t_9930 upstream=gw.acquirer-example.com status=504 latency=30008ms
+2026-07-11 09:01:44 INFO  [payments-api] capture ok (retry 2) txn=t_9930 latency=210ms
+2026-07-11 09:04:19 ERROR [payments-api] capture FAILED txn=t_9944 upstream=gw.acquirer-example.com status=504 latency=30011ms
+2026-07-11 09:06:02 WARN  [payments-api] circuit breaker OPEN for gw.acquirer-example.com (5 failures/5min)

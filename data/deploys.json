@@ -1,0 +1,10 @@
+{
+  "deploys": [
+    {"service": "checkout-api", "version": "2026.07.11-3", "deployed_at": "2026-07-11 09:02:00",
+     "commit": "9f3ab21", "author": "j.doe", "summary": "Add gift-message support to order submission"},
+    {"service": "payments-api", "version": "2026.07.08-1", "deployed_at": "2026-07-08 14:20:00",
+     "commit": "77c1e02", "author": "s.rao", "summary": "Routine dependency bumps"},
+    {"service": "search-api", "version": "2026.07.10-2", "deployed_at": "2026-07-10 16:41:00",
+     "commit": "b2d9c44", "author": "m.chen", "summary": "Ranking tweak"}
+  ]
+}

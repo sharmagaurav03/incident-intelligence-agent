@@ -1,0 +1,11 @@
+# mock everything -- runs with no credentials
+data_dir: data
+output_dir: out
+source_dir: sample_service
+llm:
+  mode: mock
+adapters:
+  tickets: file
+  logs: file
+  metrics: file
+  fix_publisher: file

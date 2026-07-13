@@ -1,0 +1,43 @@
+{
+  "incidents": [
+    {
+      "sys_id": "a1b2c3d4",
+      "number": "INC1001",
+      "short_description": "checkout-api returning 500 errors on POST /orders",
+      "description": "Customers report order submission failing since ~09:10. Error banner says 'something went wrong'. Support queue filling up. Please investigate urgently.",
+      "cmdb_ci": "checkout-api",
+      "priority": "2",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2026-07-11 09:14:00",
+      "assignment_group": "platform-oncall",
+      "work_notes": []
+    },
+    {
+      "sys_id": "e5f6a7b8",
+      "number": "INC1002",
+      "short_description": "Orders failing with HTTP 500 on checkout",
+      "description": "Duplicate reports from EU support: POST /orders 500s on checkout-api starting shortly after 09:10.",
+      "cmdb_ci": "checkout-api",
+      "priority": "2",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2026-07-11 09:19:00",
+      "assignment_group": "platform-oncall",
+      "work_notes": []
+    },
+    {
+      "sys_id": "c9d0e1f2",
+      "number": "INC1003",
+      "short_description": "payments-api intermittent failures, card charges not completing",
+      "description": "Payment capture step timing out intermittently since 08:55. Roughly 30% of attempts fail then succeed on retry.",
+      "cmdb_ci": "payments-api",
+      "priority": "2",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2026-07-11 09:05:00",
+      "assignment_group": "platform-oncall",
+      "work_notes": []
+    }
+  ]
+}
