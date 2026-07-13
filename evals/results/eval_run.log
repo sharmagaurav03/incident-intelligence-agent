@@ -1,0 +1,21 @@
+13277852 (+dupes ['13277853']): unknown @ 0.05  redactions=0 (4.71s)
+13290857 (+dupes ['13290860']): code-defect @ 0.72  redactions=0 (14.45s)
+13319209 (+dupes ['13319210']): capacity @ 0.82  redactions=0 (12.49s)
+13338464 (+dupes ['13338465']): capacity @ 0.82  redactions=0 (13.56s)
+13362435 (+dupes ['13362436']): dependency-api-failure @ 0.72  redactions=0 (15.42s)
+13362677 (+dupes ['13362678', '13362680']): code-defect @ 0.93  redactions=0 (10.92s)  fix: out_eval/fix_13362677.md
+13362685: unknown @ 0.35  redactions=0 (8.63s)
+13362689: unknown @ 0.40  redactions=0 (11.06s)
+13363121 (+dupes ['13363124', '13363125']): unknown @ 0.05  redactions=0 (4.62s)
+13374158 (+dupes ['13374159']): code-defect @ 0.82  redactions=0 (13.74s)  fix: out_eval/fix_13374158.md
+13540519 (+dupes ['13540520']): dependency-api-failure @ 0.95  redactions=0 (7.56s)
+13547359 (+dupes ['13547360', '13547361']): unknown @ 0.20  redactions=0 (8.19s)
+13558084 (+dupes ['13558085']): code-defect @ 0.93  redactions=0 (12.39s)  fix: out_eval/fix_13558084.md
+13559294 (+dupes ['13559297', '13559305', '13559307', '13559310', '13559311', '13559312', '13559314', '13559315', '13559316']): infrastructure @ 0.82  redactions=0 (9.05s)
+13559298 (+dupes ['13559299']): capacity @ 0.55  redactions=0 (10.61s)
+13559308 (+dupes ['13559313']): unknown @ 0.35  redactions=0 (7.88s)
+13559309: unknown @ 0.35  redactions=0 (8.42s)
+13560036: unknown @ 0.35  redactions=0 (9.67s)
+13560037: unknown @ 0.35  redactions=0 (10.29s)
+13598479 (+dupes ['13598480']): code-defect @ 0.97  redactions=0 (13.9s)  fix: out_eval/fix_13598479.md
+LLM usage: 20 calls, 12164 in / 9825 out tokens, 0 errors

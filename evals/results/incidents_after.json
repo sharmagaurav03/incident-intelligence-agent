@@ -1,0 +1,746 @@
+{
+  "incidents": [
+    {
+      "sys_id": "gitbugs-13277852",
+      "number": "13277852",
+      "short_description": "Read Repair",
+      "description": "Added page on Read Repair.\nhttps://github.com/apache/cassandra/pull/413",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2020-01-07 03:53:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: unknown (confidence 0.05)\nNarrative: The provided incident record contains only a reference to a GitHub pull request adding documentation about the Cassandra 'Read Repair' mechanism. There are no logs, metrics, change records, or similar past incidents to analyze. Without any operational evidence of a failure, error, or degradation, it is impossible to classify a root cause.\nEvidence sources: []\nEvidence refs: [\"Incident title references 'Read Repair' and links to a documentation PR (apache/cassandra#413)\", 'No logs provided', 'No metrics provided', 'No change summary provided', 'No similar past incidents provided']\nSuggested next step: Gather actual incident telemetry: error logs, latency/throughput metrics, and any deployment or configuration changes that preceded the incident to enable meaningful triage.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13277853\nRouted to human triage (low confidence or no evidence)."
+      ]
+    },
+    {
+      "sys_id": "gitbugs-13277853",
+      "number": "13277853",
+      "short_description": "Added Full Repair Example",
+      "description": "Added full repair example.\nhttps://github.com/apache/cassandra/pull/414",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2020-01-07 04:02:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13277852 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13277852"
+    },
+    {
+      "sys_id": "gitbugs-13290857",
+      "number": "13290857",
+      "short_description": "Fix flakey testSendLarge - org.apache.cassandra.net.ConnectionTest",
+      "description": "The test fails sometimes with the following error message and trace. \n\n{code:java}\nreceived count values don't match expected:<10> but was:<9>\n\njunit.framework.AssertionFailedError: received count values don't match expected:<10> but was:<9>\nat org.apache.cassandra.net.ConnectionUtils$InboundCountChecker.doCheck(ConnectionUtils.java:212)\nat org.apache.cassandra.net.ConnectionUtils$InboundCountChecker.check(ConnectionUtils.java:200)\nat org.apache.cassandra.net.ConnectionTest.lambda$testSendLarge$15(ConnectionTest.java:359)\nat org.apache.cassandra.net.ConnectionTest.lambda$doTest$8(ConnectionTest.java:242)\nat org.apache.cassandra.net.ConnectionTest.doTestManual(ConnectionTest.java:262)\nat org.apache.cassandra.net.ConnectionTest.doTest(ConnectionTest.java:240)\nat org.apache.cassandra.net.ConnectionTest.test(ConnectionTest.java:229)\nat org.apache.cassandra.net.ConnectionTest.testSendLarge(ConnectionTest.java:312)\n{code}",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2020-03-10 16:39:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: code-defect (confidence 0.72)\nNarrative: The test `testSendLarge` intermittently fails with a received message count of 9 instead of the expected 10. This is a classic race condition / timing issue in a test that verifies asynchronous message delivery: the assertion fires before all 10 large messages have been fully received and counted. No infrastructure changes, dependency failures, config changes, or data issues are implicated. The flaw lies in the test's synchronization or wait logic \u2014 the `InboundCountChecker` checks the count without adequate polling/back-off or barrier synchronization, so occasionally the 10th in-flight large message has not yet been tallied when the check executes.\nEvidence sources: []\nEvidence refs: [\"AssertionError: received count values don't match expected:<10> but was:<9> \u2014 exactly one message short, consistent with a race between message arrival and assertion evaluation\", \"Failure is described as 'flakey' \u2014 non-deterministic, pointing to a timing/synchronization defect rather than a functional logic error\", 'Stack trace shows InboundCountChecker.doCheck at ConnectionUtils.java:212 performing a point-in-time count check with no indication of retry/await semantics', 'testSendLarge exercises large message paths which are inherently slower to process, increasing the window for the race condition', 'No changes, infrastructure anomalies, or dependency failures reported \u2014 eliminating all other root-cause categories']\nSuggested next step: Inspect `ConnectionUtils.InboundCountChecker.check()` (ConnectionUtils.java:200-212) to confirm it performs a single snapshot count with no retry loop or Awaitility-style polling; if so, add a bounded wait (e.g., `Awaitility.await().atMost(10, SECONDS).until(() -> count == 10)`) and similarly audit `doTestManual` / `doTest` for missing barriers after sending all messages before asserting receipt.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13290860"
+      ],
+      "u_agent_category": "code-defect",
+      "u_agent_confidence": "0.72"
+    },
+    {
+      "sys_id": "gitbugs-13290860",
+      "number": "13290860",
+      "short_description": "Fix flakey testSerializeError - org.apache.cassandra.net.ConnectionTest",
+      "description": "The test fails sometimes with the following error message and trace.\u00a0\n{code:java}\nprocessed count values don't match expected:<90> but was:<89>\n\njunit.framework.AssertionFailedError: processed count values don't match expected:<90> but was:<89>\nat org.apache.cassandra.net.ConnectionUtils$InboundCountChecker.doCheck(ConnectionUtils.java:217)\nat org.apache.cassandra.net.ConnectionUtils$InboundCountChecker.check(ConnectionUtils.java:200)\nat org.apache.cassandra.net.ConnectionTest.lambda$testSerializeError$24(ConnectionTest.java:494)\nat org.apache.cassandra.net.ConnectionTest.lambda$doTest$8(ConnectionTest.java:240)\nat org.apache.cassandra.net.ConnectionTest.doTestManual(ConnectionTest.java:260)\nat org.apache.cassandra.net.ConnectionTest.doTest(ConnectionTest.java:238)\nat org.apache.cassandra.net.ConnectionTest.test(ConnectionTest.java:227)\nat org.apache.cassandra.net.ConnectionTest.testSerializeError(ConnectionTest.java:435){code}",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2020-03-10 16:40:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13290857 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13290857"
+    },
+    {
+      "sys_id": "gitbugs-13319209",
+      "number": "13319209",
+      "short_description": "CircleCI Unit Tests issue on latest trunk - java.lang.OutOfMemoryError: Java heap space ",
+      "description": "We persistently see on the latest CircleCI trunk the following error:\n\n\u00a0\n{code:java}\nBUILD FAILED\n/tmp/cassandra/build.xml:1982: The following error occurred while executing this line:\n/tmp/cassandra/build.xml:1866: java.lang.OutOfMemoryError: Java heap space\n at java.lang.AbstractStringBuilder.<init>(AbstractStringBuilder.java:68)\n at java.lang.StringBuffer.<init>(StringBuffer.java:128)\n at com.sun.org.apache.xml.internal.utils.FastStringBuffer.getString(FastStringBuffer.java:872)\n at com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2.getStringValueX(SAX2DTM2.java:2937)\n at com.sun.org.apache.xalan.internal.xsltc.dom.DOMAdapter.getStringValueX(DOMAdapter.java:284)\n at junit_frames.template$dot$5()\n at junit_frames.applyTemplates5()\n at junit_frames.package()\n at junit_frames.template$dot$0()\n at junit_frames.applyTemplates()\n at junit_frames.applyTemplates()\n at junit_frames.transform()\n at com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet.transform(AbstractTranslet.java:620)\n at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:730)\n at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:343)\n at org.apache.tools.ant.taskdefs.optional.TraXLiaison.transform(TraXLiaison.java:201)\n at org.apache.tools.ant.taskdefs.XSLTProcess.process(XSLTProcess.java:870)\n at org.apache.tools.ant.taskdefs.XSLTProcess.execute(XSLTProcess.java:408)\n at org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer.transform(AggregateTransformer.java:281)\n at org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator.execute(XMLResultAggregator.java:157)\n at org.apache.tools.ant.UnknownElement.execute(UnknownElement.java:292)\n at sun.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n at java.lang.reflect.Method.invoke(Method.java:498)\n at org.apache.tools.ant.dispatch.DispatchUtils.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2020-07-24 18:07:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: capacity (confidence 0.82)\nNarrative: The CircleCI build fails consistently with java.lang.OutOfMemoryError: Java heap space during the JUnit XML report aggregation and XSL transformation phase (not during test execution itself). The Ant junitreport task is attempting to transform a large volume of XML test result files into HTML reports using XSLT, and the JVM heap allocated to the Ant process is insufficient to hold the in-memory DOM/DTM representation of the accumulated results. This is a resource/capacity issue: the heap size configured for the Ant build process is too small relative to the size of the test result corpus on the current trunk. The stack trace is entirely within Ant's XML aggregation and XSLT transformation machinery, with no application code implicated, and there are no code changes, dependency changes, or config changes reported.\nEvidence sources: []\nEvidence refs: ['java.lang.OutOfMemoryError: Java heap space \u2014 explicit heap exhaustion error', \"Stack trace originates in org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator.execute and AggregateTransformer.transform \u2014 failure is in Ant's JUnit report generation, not in test execution\", 'SAX2DTM2.getStringValueX and FastStringBuffer.getString indicate large in-memory XML/string buffer allocation during XSLT transformation of test results', 'Error occurs at build.xml:1866/1982, consistent with the junitreport Ant task', \"Issue is described as persistent on 'latest trunk', suggesting the test suite has grown to a size that exceeds current heap allocation\", 'No code changes, dependency changes, config changes, or metrics provided that would point to a regression in application code']\nSuggested next step: Increase the JVM heap size for the Ant junitreport task in build.xml (e.g., add fork='true' and set maxmemory='2g' or higher on the junitreport or xslt task), or split the report generation into smaller batches. Also verify whether the number of test result XML files has grown recently on trunk.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13319210"
+      ],
+      "u_agent_category": "capacity",
+      "u_agent_confidence": "0.82"
+    },
+    {
+      "sys_id": "gitbugs-13319210",
+      "number": "13319210",
+      "short_description": "CircleCI UnitTests error - java.lang.OutOfMemoryError: Java heap space",
+      "description": "We persistently see on the latest CircleCI trunk the following error:\n\n(MIDRES)\n\n\u00a0\n{code:java}\nBUILD FAILED\n/tmp/cassandra/build.xml:1982: The following error occurred while executing this line:\n/tmp/cassandra/build.xml:1866: java.lang.OutOfMemoryError: Java heap space\n at java.lang.AbstractStringBuilder.<init>(AbstractStringBuilder.java:68)\n at java.lang.StringBuffer.<init>(StringBuffer.java:128)\n at com.sun.org.apache.xml.internal.utils.FastStringBuffer.getString(FastStringBuffer.java:872)\n at com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2.getStringValueX(SAX2DTM2.java:2937)\n at com.sun.org.apache.xalan.internal.xsltc.dom.DOMAdapter.getStringValueX(DOMAdapter.java:284)\n at junit_frames.template$dot$5()\n at junit_frames.applyTemplates5()\n at junit_frames.package()\n at junit_frames.template$dot$0()\n at junit_frames.applyTemplates()\n at junit_frames.applyTemplates()\n at junit_frames.transform()\n at com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet.transform(AbstractTranslet.java:620)\n at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:730)\n at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:343)\n at org.apache.tools.ant.taskdefs.optional.TraXLiaison.transform(TraXLiaison.java:201)\n at org.apache.tools.ant.taskdefs.XSLTProcess.process(XSLTProcess.java:870)\n at org.apache.tools.ant.taskdefs.XSLTProcess.execute(XSLTProcess.java:408)\n at org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer.transform(AggregateTransformer.java:281)\n at org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator.execute(XMLResultAggregator.java:157)\n at org.apache.tools.ant.UnknownElement.execute(UnknownElement.java:292)\n at sun.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n at java.lang.reflect.Method.invoke(Method.java:498)\n at org.apache.tools.ant.dispatch.Disp",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2020-07-24 18:10:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13319209 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13319209"
+    },
+    {
+      "sys_id": "gitbugs-13338464",
+      "number": "13338464",
+      "short_description": "LEAK DETECTED:  was not released before the reference was garbage collected",
+      "description": "Hello,\n\nI am getting the following errors and I am running 3.11.5\n{code:java}\nLEAK DETECTED: a reference (org.apache.cassandra.utils.concurrent.Ref$State@356cb07f) to class org.apache.cassandra.io.util.SafeMemory$MemoryTidy@1709177197:Memory@[7e7a3b64b910..7e7a3b96b910) was not released before the reference was garbage collected\n\n\nERROR [CompactionExecutor:3763] 2020-11-02 02:34:53,316  CassandraDaemon.java:228 - Exception in thread Thread[CompactionExecutor:3763,1,main]\norg.apache.cassandra.io.FSReadError: java.io.IOException: Map failed\n        at org.apache.cassandra.io.util.ChannelProxy.map(ChannelProxy.java:157) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions$State.add(MmappedRegions.java:310) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions$State.access$400(MmappedRegions.java:246) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions.updateState(MmappedRegions.java:170) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions.<init>(MmappedRegions.java:73) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions.<init>(MmappedRegions.java:61) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions.map(MmappedRegions.java:104) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.FileHandle$Builder.complete(FileHandle.java:362) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.sstable.format.big.BigTableWriter.openEarly(BigTableWriter.java:290) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.sstable.SSTableRewriter.maybeReopenEarly(SSTableRewriter.java:180) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.sstable.SSTableRewriter.append(SSTableRewriter.java:135) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.db.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2020-11-02 16:57:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: capacity (confidence 0.82)\nNarrative: The primary error is 'java.io.IOException: Map failed' thrown from ChannelProxy.map() during MmappedRegions initialization, which occurs when the OS cannot create a new memory-mapped region. This is almost always caused by exhaustion of the process's virtual memory map count (vm.max_map_count on Linux), or exhaustion of virtual address space. The LEAK DETECTED message about SafeMemory/Ref not being released before GC is a secondary symptom: when mmap fails mid-compaction, the partially-constructed objects are abandoned without proper cleanup, triggering Cassandra's reference-leak detector. The fact that this occurs in the CompactionExecutor during SSTableRewriter.append() \u2192 BigTableWriter.openEarly() \u2192 MmappedRegions.map() confirms this is a resource exhaustion scenario at the OS/JVM level, not a code defect, configuration error, or dependency failure. No changes, metrics, or logs were provided to suggest an alternative cause.\nEvidence sources: []\nEvidence refs: ['java.io.IOException: Map failed at org.apache.cassandra.io.util.ChannelProxy.map(ChannelProxy.java:157) \u2014 mmap syscall returned an error', 'LEAK DETECTED: org.apache.cassandra.io.util.SafeMemory$MemoryTidy reference not released before GC \u2014 secondary symptom of aborted mmap operation leaving unreleased reference', 'Stack trace originates in CompactionExecutor during SSTableRewriter.append() \u2192 BigTableWriter.openEarly() \u2192 MmappedRegions.map() \u2014 mmap failure during compaction, a memory-intensive operation', 'Cassandra 3.11.5 uses disk_access_mode: mmap by default, creating large numbers of memory-mapped regions that can exhaust vm.max_map_count', 'No changes, no code modifications, no dependency failures reported \u2014 rules out change-induced and dependency-api-failure categories']\nSuggested next step: On the affected node, check `cat /proc/sys/vm/max_map_count` and compare against current usage `cat /proc/<cassandra-pid>/maps | wc -l`. If near or at the limit, increase vm.max_map_count (e.g., `sysctl -w vm.max_map_count=1048576` and persist in /etc/sysctl.conf). Also check `ulimit -v` for virtual address space limits and available disk space on the data directory. Consider switching disk_access_mode to mmap_index_only or standard in cassandra.yaml if mmap region count remains a recurring constraint.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13338465"
+      ],
+      "u_agent_category": "capacity",
+      "u_agent_confidence": "0.82"
+    },
+    {
+      "sys_id": "gitbugs-13338465",
+      "number": "13338465",
+      "short_description": "LEAK DETECTED: was not released before the reference was garbage collected",
+      "description": "Hello,\n\nI am getting the following errors and I am running 3.11.5\n{code:java}\nLEAK DETECTED: a reference (org.apache.cassandra.utils.concurrent.Ref$State@356cb07f) to class org.apache.cassandra.io.util.SafeMemory$MemoryTidy@1709177197:Memory@[7e7a3b64b910..7e7a3b96b910) was not released before the reference was garbage collected\n\n\nERROR [CompactionExecutor:3763] 2020-11-02 02:34:53,316  CassandraDaemon.java:228 - Exception in thread Thread[CompactionExecutor:3763,1,main]\norg.apache.cassandra.io.FSReadError: java.io.IOException: Map failed\n        at org.apache.cassandra.io.util.ChannelProxy.map(ChannelProxy.java:157) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions$State.add(MmappedRegions.java:310) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions$State.access$400(MmappedRegions.java:246) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions.updateState(MmappedRegions.java:170) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions.<init>(MmappedRegions.java:73) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions.<init>(MmappedRegions.java:61) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.MmappedRegions.map(MmappedRegions.java:104) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.util.FileHandle$Builder.complete(FileHandle.java:362) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.sstable.format.big.BigTableWriter.openEarly(BigTableWriter.java:290) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.sstable.SSTableRewriter.maybeReopenEarly(SSTableRewriter.java:180) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.io.sstable.SSTableRewriter.append(SSTableRewriter.java:135) ~[apache-cassandra-3.11.5.jar:3.11.5]\n        at org.apache.cassandra.db.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2020-11-02 17:04:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13338464 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13338464"
+    },
+    {
+      "sys_id": "gitbugs-13362435",
+      "number": "13362435",
+      "short_description": "Cassandra 3.11.2 not compatible with Oracle JRE 1.8.0_281",
+      "description": "In our environments, we need to patch with latest JRE when Oracle release its quarterly critical patch update.\n\nWe are running Teamwork cloud 19.0 SP4 and Cassandra 3.11.2 which is using JRE 1.8.0_251 at the moment.\n\nAll Java critical patch update after 251 seem to be incompatible with Cassandra . Latest Java 8 Update 281 is also not compatible .\n\nWhen Cassandra windows service is started with latest Java 8 Update 281 installed , service does not start . Error is thrown in system and debug log files(Refer attached)\n\nPlease advise on how to keep the environment patched with latest update and also have cassandra running .",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-04 23:37:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: dependency-api-failure (confidence 0.72)\nNarrative: Cassandra 3.11.2 fails to start its Windows service after upgrading Oracle JRE from 1.8.0_251 to 1.8.0_281 (or any post-251 quarterly CPU patch). This is a known compatibility breakage between Cassandra 3.11.x and Oracle JRE builds beyond u251, likely due to JVM internal API or security-policy changes introduced in Oracle's Critical Patch Updates that Cassandra 3.11.2 relies upon (e.g., removed/restricted reflective access, changed TLS defaults, or altered JAAS/JMX security internals). This is not a code defect in the customer's codebase nor a configuration error \u2014 it is an incompatibility between a third-party runtime dependency (Oracle JRE) and a specific version of Cassandra (3.11.2), making it a dependency/API failure.\nEvidence sources: []\nEvidence refs: ['Cassandra 3.11.2 currently running on JRE 1.8.0_251 \u2014 working state confirmed.', 'All Java 8 Critical Patch Updates after u251 reported incompatible with Cassandra 3.11.2.', 'JRE upgraded to 1.8.0_281 (Oracle quarterly CPU) \u2014 Cassandra Windows service fails to start.', 'Errors observed in Cassandra system and debug log files upon service start attempt with u281.', 'No changes to Cassandra version or application configuration between working and broken states \u2014 only JRE version changed.', 'No log content provided to narrow down the specific JVM-level error (e.g., reflection, TLS, security manager).']\nSuggested next step: 1. Retrieve and share the full Cassandra system.log and debug.log error output from the failed startup \u2014 look for 'IllegalAccessError', 'NoSuchMethodError', 'SSLHandshakeException', or security manager rejections to pinpoint the exact JVM API break. 2. Check the Apache Cassandra JIRA (CASSANDRA project) for known issues with JRE > u251 on 3.11.x. 3. Evaluate upgrading Cassandra to 3.11.10+ or 4.x which may have patched JRE compatibility. 4. As a temporary workaround, test OpenJDK 8 (e.g., Adoptium/Temurin 8u292+) as a drop-in replacement \u2014 OpenJDK builds often handle post-u251 changes differently and may be compatible. 5. Confirm with TeamWork Cloud vendor (No Magic/Dassault) whether a supported Cassandra + JRE version matrix exists for TWC 19.0 SP4.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13362436"
+      ],
+      "u_agent_category": "dependency-api-failure",
+      "u_agent_confidence": "0.72"
+    },
+    {
+      "sys_id": "gitbugs-13362436",
+      "number": "13362436",
+      "short_description": "Cassandra not compatible with Oracle JRE 1.8.0_281 ",
+      "description": "In our environments, we need to patch with latest JRE when Oracle release its quarterly critical patch update.\n\nWe are running Teamwork cloud 19.0 SP4 and Cassandra 3.11.2 which is using JRE 1.8.0_251 at the moment.\n\nAll Java critical patch update after 251 seem to be incompatible with Cassandra . Latest Java 8 Update 281 is also not compatible .\n\nWhen Cassandra windows service is started with java 8 update 281 installed , it throws error in the system and debug log (refer attached) and the service stops.\n\nPlease advise on how to keep the environment patched with latest update and also have cassandra running .",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-04 23:41:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13362435 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13362435"
+    },
+    {
+      "sys_id": "gitbugs-13362677",
+      "number": "13362677",
+      "short_description": "nodetool bootstrap resume completes successfully even if there is an error during bootstrap",
+      "description": "\"nodetool bootstrap resume\u201d prints a relevant error message if the operation fails, but it then proceeds to return a normal error code. It ignores the ProgressEventType.ERROR message that arrives before COMPLETE. This also happens when we handle failed connections. BootstrapMonitor should at least track whether or not it has seen an error, which would allow us to throw when one occurs after signaling, and therefore to inform callers.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-05 18:46:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: code-defect (confidence 0.93)\nNarrative: The incident describes a logic bug in the `nodetool bootstrap resume` command where `BootstrapMonitor` silently ignores `ProgressEventType.ERROR` events that arrive before the `COMPLETE` event. As a result, the tool exits with a success (zero) return code even when the bootstrap operation has actually failed. The same flaw surfaces when handling failed connections. The fix requires `BootstrapMonitor` to track whether an error event was observed and propagate a non-zero exit code (or throw an exception) after the operation signals completion.\nEvidence sources: []\nEvidence refs: ['nodetool bootstrap resume prints a relevant error message if the operation fails, but then proceeds to return a normal error code', 'It ignores the ProgressEventType.ERROR message that arrives before COMPLETE', 'This also happens when we handle failed connections', 'BootstrapMonitor should at least track whether or not it has seen an error, which would allow us to throw when one occurs after signaling']\nSuggested next step: Locate the BootstrapMonitor class (likely in src/java/org/apache/cassandra/tools/nodetool/BootstrapMonitor.java or similar), add a boolean `hasError` field set to `true` on receipt of `ProgressEventType.ERROR`, and after the completion signal check `hasError` to throw an exception or return a non-zero exit code.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13362678, 13362680",
+        "[triage-agent] Fix suggestion: out_eval/fix_13362677.md"
+      ],
+      "u_agent_category": "code-defect",
+      "u_agent_confidence": "0.93"
+    },
+    {
+      "sys_id": "gitbugs-13362678",
+      "number": "13362678",
+      "short_description": "nodetool bootstrap resume returns success even if there is an error during bootstrap",
+      "description": "\"nodetool bootstrap resume\u201d prints a relevant error message if the operation fails, but it then proceeds to return a normal error code. It ignores the ProgressEventType.ERROR message that arrives before COMPLETE. This also happens when we handle failed connections. BootstrapMonitor should at least track whether or not it has seen an error, which would allow us to throw when one occurs after signaling, and therefore to inform callers.\n\nTrunk PR: [https://github.com/apache/cassandra/pull/1949]",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-05 18:50:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13362677 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13362677"
+    },
+    {
+      "sys_id": "gitbugs-13362680",
+      "number": "13362680",
+      "short_description": "nodetool bootstrap resume completes successfully even if there is an error during bootstrap",
+      "description": "\"nodetool bootstrap resume\u201d prints a relevant error message if the operation fails, but it then proceeds to return a normal error code. It ignores the ProgressEventType.ERROR message that arrives before COMPLETE. This also happens when we handle failed connections. BootstrapMonitor should at least track whether or not it has seen an error, which would allow us to throw when one occurs after signaling, and therefore to inform callers.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-05 18:51:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13362677 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13362677"
+    },
+    {
+      "sys_id": "gitbugs-13362685",
+      "number": "13362685",
+      "short_description": "IPMembershipTest.sameIPFailWithoutReplace fails with timeout",
+      "description": "https://ci-cassandra.apache.org/job/Cassandra-trunk/307/testReport/junit/org.apache.cassandra.distributed.test/IPMembershipTest/sameIPFailWithoutReplace/\n\n{noformat}\njava.lang.RuntimeException: com.datastax.driver.core.exceptions.NoHostAvailableException: All host(s) tried for query failed (tried: localhost/0:0:0:0:0:0:0:1:9042 (com.datastax.driver.core.exceptions.TransportException: [localhost/0:0:0:0:0:0:0:1:9042] Cannot connect), localhost/127.0.0.1:9042 (com.datastax.driver.core.exceptions.OperationTimedOutException: [localhost/127.0.0.1:9042] Operation timed out))\n\tat org.apache.cassandra.stress.settings.StressSettings.getJavaDriverClient(StressSettings.java:146)\n\tat org.apache.cassandra.stress.settings.StressSettings.getJavaDriverClient(StressSettings.java:114)\n\tat org.apache.cassandra.stress.settings.SettingsSchema.createKeySpaces(SettingsSchema.java:66)\n\tat org.apache.cassandra.stress.settings.StressSettings.maybeCreateKeyspaces(StressSettings.java:154)\n\tat org.apache.cassandra.stress.StressAction.run(StressAction.java:56)\n\tat org.apache.cassandra.stress.Stress.run(Stress.java:155)\n\tat org.apache.cassandra.stress.Stress.main(Stress.java:63)\n{noformat}",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-05 19:37:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: unknown (confidence 0.35)\nNarrative: The test IPMembershipTest.sameIPFailWithoutReplace failed with a timeout/connection failure when cassandra-stress attempted to connect to the cluster. The error shows two connection attempts failed: one with a TransportException (cannot connect) on the IPv6 loopback and one with an OperationTimedOutException on IPv4 loopback. This is consistent with the Cassandra node not being fully up or not accepting connections at the time stress ran, which could be caused by a flaky test environment (infrastructure), a race condition in the test setup (code-defect), or a networking/binding misconfiguration. However, there are no logs, no metrics, no recent changes, and no similar past incidents to narrow down the root cause further. The evidence is insufficient to make a high-confidence determination.\nEvidence sources: []\nEvidence refs: ['NoHostAvailableException: All host(s) tried for query failed', 'localhost/0:0:0:0:0:0:0:1:9042 TransportException: Cannot connect', 'localhost/127.0.0.1:9042 OperationTimedOutException: Operation timed out', 'Failure occurred in StressSettings.getJavaDriverClient during schema creation phase', 'No logs, metrics, or change history provided', 'No similar past incidents recorded']\nSuggested next step: Examine the full CI build log for node startup messages, gossip state, and any ERROR/WARN lines from the Cassandra node under test to determine whether the node failed to start, started too slowly, or had a port binding conflict between IPv4 and IPv6 loopback addresses.\nPII redactions applied to evidence: 0\nRouted to human triage (low confidence or no evidence)."
+      ]
+    },
+    {
+      "sys_id": "gitbugs-13362689",
+      "number": "13362689",
+      "short_description": " org.apache.cassandra.distributed.test.TopologyChangeTest failing with client timeout",
+      "description": "Two tests failing with the same error, so I'm assuming they're related. \ntestRestartNode[1: provision strategy=OneNetworkInterface]\ntestDecommission[1: provision strategy=OneNetworkInterface]\n\nFeel free to split out if it ends up looking like something different.\n\nhttps://ci-cassandra.apache.org/job/Cassandra-trunk/307/#showFailuresLink\nhttps://app.circleci.com/pipelines/github/adelapena/cassandra/210/workflows/d21c7f93-58a7-4522-a505-0844304de67f/jobs/1700\n\n{noformat}\ncom.datastax.driver.core.exceptions.NoHostAvailableException: All host(s) tried for query failed (tried: /127.0.0.1:9042 (com.datastax.driver.core.exceptions.OperationTimedOutException: [/127.0.0.1:9042] Operation timed out))\n\tat com.datastax.driver.core.ControlConnection.reconnectInternal(ControlConnection.java:270)\n\tat com.datastax.driver.core.ControlConnection.connect(ControlConnection.java:109)\n\tat com.datastax.driver.core.Cluster$Manager.negotiateProtocolVersionAndConnect(Cluster.java:1813)\n\tat com.datastax.driver.core.Cluster$Manager.init(Cluster.java:1726)\n\tat com.datastax.driver.core.Cluster.init(Cluster.java:214)\n\tat com.datastax.driver.core.Cluster.connectAsync(Cluster.java:387)\n\tat com.datastax.driver.core.Cluster.connectAsync(Cluster.java:366)\n\tat com.datastax.driver.core.Cluster.connect(Cluster.java:311)\n\tat org.apache.cassandra.distributed.test.TopologyChangeTest.testRestartNode(TopologyChangeTest.java:176)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n{noformat}",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-05 19:56:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: unknown (confidence 0.40)\nNarrative: Two tests in TopologyChangeTest (testRestartNode and testDecommission, both under OneNetworkInterface provision strategy) are failing with a client-side OperationTimedOutException when the Java driver attempts to connect to 127.0.0.1:9042. The error occurs during Cluster initialization/control connection setup, meaning the embedded Cassandra node is either not accepting connections in time after a restart/decommission operation, or is taking longer than the driver's default timeout allows. Without logs, metrics, or a recent code/config change to point to, it is impossible to distinguish between a flaky timing/race condition in the test harness, a genuine infrastructure slowness in CI, a regression in node startup/decommission speed, or a test code defect. The two affected tests share the same provision strategy parameterization, suggesting the issue may be environment- or resource-specific rather than logic-specific.\nEvidence sources: []\nEvidence refs: ['NoHostAvailableException: All host(s) tried for query failed (tried: /127.0.0.1:9042 (OperationTimedOutException))', 'Failure occurs at Cluster.connect() -> ControlConnection.connect() during driver initialization in testRestartNode:176', \"Both failing tests share the same parameter: '1: provision strategy=OneNetworkInterface'\", 'Two different CI environments exhibit the same failure (ci-cassandra.apache.org and circleci)', 'No logs, metrics, or changes summary provided to narrow root cause', 'No similar past incidents on record']\nSuggested next step: Collect Cassandra node logs from the test run (system.log, debug.log) to determine whether the node actually came up and was accepting native transport connections before the driver timed out. Also check if increasing the driver connect timeout or adding an explicit wait-for-native-transport-ready poll in the test setUp resolves the flakiness.\nPII redactions applied to evidence: 0\nRouted to human triage (low confidence or no evidence)."
+      ]
+    },
+    {
+      "sys_id": "gitbugs-13363121",
+      "number": "13363121",
+      "short_description": "GSoC Blog Post",
+      "description": "Ticket to track review and publishing of GSoC blog post. \n\nThe blog post is available on this [google document|https://docs.google.com/document/d/1YLiyZ_quiDpCUyT3tyuWmVKiuj7h3HZdeBvqLzuMGes/edit]. This draft was announced on #cassandra-dev on slack and already reviewed by some community members.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-09 00:07:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: unknown (confidence 0.05)\nNarrative: This ticket describes an administrative/content task (reviewing and publishing a GSoC blog post) rather than a technical incident. There are no logs, metrics, changes, or similar past incidents provided. There is no evidence of any infrastructure, code, configuration, or dependency failure to classify.\nEvidence sources: []\nEvidence refs: ['No logs provided', 'No metrics provided', 'No changes summary provided', 'No similar past incidents provided', 'Ticket description references a content review/publishing workflow, not a system failure']\nSuggested next step: Clarify whether this ticket was incorrectly routed to the incident triage system. If it is a genuine incident, provide logs, error messages, or system metrics that describe the technical failure being investigated.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13363124, 13363125\nRouted to human triage (low confidence or no evidence)."
+      ]
+    },
+    {
+      "sys_id": "gitbugs-13363124",
+      "number": "13363124",
+      "short_description": "GSoC Blog Post",
+      "description": "Ticket to track review and publishing of GSoC blog post.\n\nThe blog post is available [google document|https://docs.google.com/document/d/1YLiyZ_quiDpCUyT3tyuWmVKiuj7h3HZdeBvqLzuMGes/edit]. This draft was announced on #cassandra-dev on slack and already reviewed by some community members.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-09 00:08:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13363121 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13363121"
+    },
+    {
+      "sys_id": "gitbugs-13363125",
+      "number": "13363125",
+      "short_description": "GSoC Blog Post",
+      "description": "Ticket to track review and publishing of GSoC blog post.\n\nThe blog post is available [google document|https://docs.google.com/document/d/1YLiyZ_quiDpCUyT3tyuWmVKiuj7h3HZdeBvqLzuMGes/edit]. This draft was announced on #cassandra-dev on slack and already reviewed by some community members.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-03-09 00:09:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13363121 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13363121"
+    },
+    {
+      "sys_id": "gitbugs-13374158",
+      "number": "13374158",
+      "short_description": "Remove references to run_dtests from README",
+      "description": "Newcomers to cassandra-dtest that look through README.md will see that the run_dtests.py script is the quickest way to get started running tests. Unfortunately, the script has a number of problems and I'm not sure it ever work properly after the move to the pytest framework.\nh2. Process stdout/stderr buffering\n\n\nFirstly, when I execute run_dtests.py I don't see any output after\n\n$ ./run_dtests.py --dtest-tests paging_test.py \n============================= test session starts ==============================\nThis looks likely to be because of the buffering that pytest does internally for stdout and stderr and because of the way that it's executed by run_dtests.py, i.e. I suspect that run_dtests.py is blocked on the following line for most of the execution because there's no data available in the pipe for stderr:\n\nstderr_output = sp.stderr.readline()\nSee also pytest-dev/pytest#1886\nh2. --pytest-options doesn't work\n\n\nSecondly, the options specified in --pytest-options aren't actually passed through to pytest. I ran into this when trying to get more output during the execution of run_dtests.py (see above).\nh2. Most devs run pytest directly\n\n\nWhen I spoke to @ekaterinadimitrova2 it seemed like most developers just run the tests directly with pytest which would explain why run_dtests.py has bitrotted.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-04-21 14:44:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: code-defect (confidence 0.82)\nNarrative: The incident describes two concrete bugs in run_dtests.py: (1) stdout/stderr output is suppressed because the script blocks on sp.stderr.readline() while pytest internally buffers its output, causing the process to hang silently with no visible progress; (2) the --pytest-options argument is parsed but never forwarded to the pytest subprocess, making the flag a no-op. These are implementation defects in run_dtests.py that existed since the migration to pytest and went unnoticed because most developers bypass the script entirely and invoke pytest directly. There are no infrastructure, configuration, dependency, or capacity signals in the evidence.\nEvidence sources: []\nEvidence refs: [\"run_dtests.py blocks on 'stderr_output = sp.stderr.readline()' causing stdout/stderr to be silently buffered and no output visible after test session starts\", \"referenced upstream issue pytest-dev/pytest#1886 confirms pytest's internal buffering interacts poorly with pipe-based readline() consumption\", '--pytest-options flag is accepted but options are never actually passed through to the pytest invocation', 'most developers run pytest directly, confirming run_dtests.py has bitrotted since the pytest framework migration', 'no log, metric, or infrastructure evidence present \u2014 issue is entirely in script logic']\nSuggested next step: Remove or deprecate run_dtests.py and update README.md to document direct pytest invocation as the canonical way to run tests; if the script is to be kept, fix the subprocess communication to use sp.communicate() instead of readline() and ensure parsed --pytest-options are appended to the pytest argv list.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13374159",
+        "[triage-agent] Fix suggestion: out_eval/fix_13374158.md"
+      ],
+      "u_agent_category": "code-defect",
+      "u_agent_confidence": "0.82"
+    },
+    {
+      "sys_id": "gitbugs-13374159",
+      "number": "13374159",
+      "short_description": "Remove references to run_dtests from README",
+      "description": "Newcomers to cassandra-dtest that look through README.md will see that the run_dtests.py script is the quickest way to get started running tests. Unfortunately, the script has a number of problems and I'm not sure it ever work properly after the move to the pytest framework.\nh2. Process stdout/stderr buffering\n\nFirstly, when I execute run_dtests.py I don't see any output after\n\n{{$ ./run_dtests.py --dtest-tests paging_test.py\u00a0}}\n{{============================= test session starts ==============================}}\n\nThis looks likely to be because of the buffering that pytest does internally for stdout and stderr and because of the way that it's executed by run_dtests.py, i.e. I suspect that run_dtests.py is blocked on the following line for most of the execution because there's no data available in the pipe for stderr:\n\n{{stderr_output = sp.stderr.readline()}}\n\nSee also\u00a0[https://github.com/pytest-dev/pytest/issues/1886]\nh2. --pytest-options doesn't work\n\nSecondly, the options specified in --pytest-options aren't actually passed through to pytest.\nh2. Most devs run pytest directly\n\nWhen I spoke to [~edimitrova] it seemed like most developers just run the tests directly with pytest which would explain why run_dtests.py has bitrotted.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2021-04-21 14:45:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13374158 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13374158"
+    },
+    {
+      "sys_id": "gitbugs-13540519",
+      "number": "13540519",
+      "short_description": "snappy-java vulnerability: CVE-2023-34455, CVE-2023-34454, CVE-2023-34453",
+      "description": "Failing owasp:\n\n[https://nvd.nist.gov/vuln/detail/CVE-2023-34455]\n{quote}Due to use of an unchecked chunk length, an unrecoverable fatal error can occur in versions prior to 1.1.10.1.\n{quote}\n\n[https://nvd.nist.gov/vuln/detail/CVE-2023-34454]\n{quote}Due to unchecked multiplications, an integer overflow may occur in versions prior to 1.1.10.1, causing an unrecoverable fatal error. \n{quote}\n\n[https://nvd.nist.gov/vuln/detail/CVE-2023-34453]\n{quote}Due to unchecked multiplications, an integer overflow may occur in versions prior to 1.1.10.1, causing a fatal error.\n{quote}\n",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-06-18 13:37:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: dependency-api-failure (confidence 0.95)\nNarrative: The incident is a security vulnerability report against the snappy-java library (versions prior to 1.1.10.1). Three CVEs (CVE-2023-34453, CVE-2023-34454, CVE-2023-34455) describe integer overflow and unchecked chunk length issues in snappy-java that can cause unrecoverable fatal errors. The OWASP dependency-check scan flagged the currently used version as vulnerable. There are no runtime logs, metrics anomalies, or recent changes implicated \u2014 this is purely a known vulnerable third-party dependency that needs to be upgraded.\nEvidence sources: []\nEvidence refs: ['CVE-2023-34455: unchecked chunk length can cause unrecoverable fatal error in snappy-java < 1.1.10.1', 'CVE-2023-34454: unchecked multiplications causing integer overflow leading to fatal error in snappy-java < 1.1.10.1', 'CVE-2023-34453: unchecked multiplications causing integer overflow and fatal error in snappy-java < 1.1.10.1', 'OWASP dependency-check scan flagged the vulnerability', 'No runtime logs, metrics, or change events provided \u2014 issue is purely a dependency version concern']\nSuggested next step: Identify all Maven/Gradle/SBT build files that declare snappy-java as a direct or transitive dependency, upgrade the version to 1.1.10.1 or later, run OWASP dependency-check again to confirm remediation, and redeploy affected services.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13540520"
+      ],
+      "u_agent_category": "dependency-api-failure",
+      "u_agent_confidence": "0.95"
+    },
+    {
+      "sys_id": "gitbugs-13540520",
+      "number": "13540520",
+      "short_description": "snappy-java vulnerability: CVE-2023-34453",
+      "description": "Failing owasp:\n\n[https://nvd.nist.gov/vuln/detail/CVE-2023-34453]\n\nbq. Due to unchecked multiplications, an integer overflow may occur in versions prior to 1.1.10.1, causing a fatal error. ",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-06-18 13:40:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13540519 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13540519"
+    },
+    {
+      "sys_id": "gitbugs-13547359",
+      "number": "13547359",
+      "short_description": "Add an optimized default configuration to tests and make it available for new users",
+      "description": "We currently offer only one sample configuration file with Cassandra, and that file is deliberately configured to disable all new functionality and incompatible improvements. This works well for legacy users that want to have a painless upgrade, but is a very bad choice for new users, or anyone wanting to make comparisons between Cassandra versions or between Cassandra and other databases.\n\nWe offer very little indication, in the database packaging itself, that there are well-tested configuration choices that can solve known problems and dramatically improve performance. This is guaranteed to paint the database in a worse light than it deserves, and will very likely hurt adoption.\n\nWe should find a way to offer a very easy way of choosing between \"optimized\" and \"compatible\" defaults. At minimal, we could provide alternate yaml files. Alternatively, we could build on the {{storage_compatibility_mode}} concept to grow it into a setting that not only enables/disables certain settings, but also changes their default values.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-08-15 09:41:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: unknown (confidence 0.20)\nNarrative: This ticket describes a feature request / improvement proposal rather than an operational incident. There are no logs, metrics, error traces, or change events indicating a system failure or degradation. The 'incident' is a product gap observation: Cassandra ships only a legacy-compatible sample configuration, which may disadvantage new users and hurt adoption, but no service outage or functional defect is described. Without evidence of a runtime failure, misconfiguration causing harm, or a regression, this cannot be reliably classified into any of the provided root-cause categories.\nEvidence sources: []\nEvidence refs: ['No logs provided', 'No metrics provided', 'No change events provided', 'No similar past incidents referenced', 'Ticket body describes a desired feature (alternate optimized config/yaml), not a failure', \"Explicitly states current behavior 'works well for legacy users' \u2014 no breakage claimed\", 'No error messages, stack traces, or performance degradation data present']\nSuggested next step: Re-evaluate whether this should be tracked as a feature request rather than an incident. If it is being treated as an incident due to observed adoption/performance impact, gather concrete metrics (benchmark comparisons, user-reported performance data, adoption telemetry) and resubmit for triage with that evidence attached.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13547360, 13547361\nRouted to human triage (low confidence or no evidence)."
+      ]
+    },
+    {
+      "sys_id": "gitbugs-13547360",
+      "number": "13547360",
+      "short_description": "We should offer an option for optimized default configuration",
+      "description": "We currently offer only one sample configuration file with Cassandra, and that file is deliberately configured to disable all new functionality and incompatible improvements. This works well for legacy users that want to have a painless upgrade, but is a very bad choice for new users, or anyone wanting to make comparisons between Cassandra versions or between Cassandra and other databases.\n\nWe offer very little indication, in the database packaging itself, that there are well-tested configuration choices that can solve known problems and dramatically improve performance. This is guaranteed to paint the database in a worse light than it deserves, and will very likely hurt adoption.\n\nWe should find a way to offer a very easy way of choosing between \"optimized\" and \"compatible\" defaults. At minimal, we could provide alternate yaml files. Alternatively, we could build on the {{storage_compatibility_mode}} concept to grow it into a setting that not only enables/disables certain settings, but also changes their default values.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-08-15 09:41:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13547359 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13547359"
+    },
+    {
+      "sys_id": "gitbugs-13547361",
+      "number": "13547361",
+      "short_description": "Optimized default configuration",
+      "description": "We currently offer only one sample configuration file with Cassandra, and that file is deliberately configured to disable all new functionality and incompatible improvements. This works well for legacy users that want to have a painless upgrade, but is a very bad choice for new users, or anyone wanting to make comparisons between Cassandra versions or between Cassandra and other databases.\n\nWe offer very little indication, in the database packaging itself, that there are well-tested configuration choices that can solve known problems and dramatically improve performance. This is guaranteed to paint the database in a worse light than it deserves, and will very likely hurt adoption.\n\nWe should find a way to offer a very easy way of choosing between \"optimized\" and \"compatible\" defaults. At minimal, we could provide alternate yaml files. Alternatively, we could build on the {{storage_compatibility_mode}} concept to grow it into a setting that not only enables/disables certain settings, but also changes their default values.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-08-15 09:43:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13547359 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13547359"
+    },
+    {
+      "sys_id": "gitbugs-13558084",
+      "number": "13558084",
+      "short_description": "Python DTest does not release CQL connections, which can cause containers to hang for 2 hours trying to connect to a server thats already gone",
+      "description": "While debugging why upgrade tests were taking 2 hours we noticed that the test completed 2 hours early\u2026 yet the process did not exit and was logging cassandra.pool trying to connect to a cluster (but python dtest already cleaned it up)\u2026\n\nAfter investigating the code I saw that we create connections and store them in an array, but only 2 tests actually clean up!",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-15 14:42:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: code-defect (confidence 0.93)\nNarrative: Python DTest creates CQL connections and stores them in an array, but the teardown/cleanup logic only closes connections in 2 of the tests. The remaining tests leave connections open, causing the cassandra.pool driver to continue attempting reconnects to a now-defunct cluster for up to 2 hours (the default driver timeout/retry window), blocking process exit long after the test suite has logically completed.\nEvidence sources: []\nEvidence refs: ['Test completed 2 hours early yet process did not exit', 'Process was logging cassandra.pool attempting to connect to a cluster that had already been cleaned up', 'Code review revealed CQL connections are created and stored in an array', 'Only 2 tests actually call cleanup/close on those connections', \"The remaining tests do not release CQL connections, leaving the driver's reconnect loop running\"]\nSuggested next step: Audit every test class and fixture in the Python DTest suite to identify all locations where CQL connections are created. Add explicit connection.shutdown() or cluster.shutdown() calls in a teardown/finally block (or a shared fixture teardown) that runs unconditionally after every test, ensuring all entries in the connection array are closed regardless of test outcome.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13558085",
+        "[triage-agent] Fix suggestion: out_eval/fix_13558084.md"
+      ],
+      "u_agent_category": "code-defect",
+      "u_agent_confidence": "0.93"
+    },
+    {
+      "sys_id": "gitbugs-13558085",
+      "number": "13558085",
+      "short_description": "Python DTest does not release CQL connections, which can cause containers to hang for 2 hours trying to connect to a server thats already gone",
+      "description": "While debugging why upgrade tests were taking 2 hours we noticed that the test completed 2 hours early\u2026 yet the process did not exit and was logging cassandra.pool trying to connect to a cluster (but python dtest already cleaned it up)\u2026\n\nAfter investigating the code I saw that we create connections and store them in an array, but only 2 tests actually clean up!",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-15 14:45:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13558084 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13558084"
+    },
+    {
+      "sys_id": "gitbugs-13559294",
+      "number": "13559294",
+      "short_description": "Test failure: org.apache.cassandra.db.RepairedDataInfoTest",
+      "description": "{code}\nFSWriteError in build/test/cassandra/data/system\n\tat org.apache.cassandra.io.util.PathUtils.propagateUnchecked(PathUtils.java:862)\n\tat org.apache.cassandra.io.util.PathUtils.propagateUnchecked(PathUtils.java:845)\n\tat org.apache.cassandra.io.util.PathUtils.deleteRecursiveUsingNixCommand(PathUtils.java:384)\n\tat org.apache.cassandra.io.util.PathUtils.deleteRecursive(PathUtils.java:402)\n\tat org.apache.cassandra.io.util.File.deleteRecursive(File.java:225)\n\tat org.apache.cassandra.io.util.FileUtils.deleteRecursive(FileUtils.java:678)\n\tat org.apache.cassandra.schema.MockSchema.cleanup(MockSchema.java:377)\n\tat org.apache.cassandra.db.RepairedDataInfoTest.setUp(RepairedDataInfoTest.java:72)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\nCaused by: java.io.IOException: [rm, -rd, /tmp/cassandra/build/test/cassandra/data/system] returned non-zero exit code: 1\nstdout:\n{code}\n\nhttps://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20450/tests",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 09:52:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: infrastructure (confidence 0.82)\nNarrative: The test setUp method failed while attempting to delete a temporary directory '/tmp/cassandra/build/test/cassandra/data/system' using the 'rm -rd' shell command, which returned a non-zero exit code (1). This is a filesystem-level failure during test environment cleanup, not a logic defect in the test itself. The most likely causes are: the directory is owned by a different user/process (permissions issue), a file within the directory is locked or in use by another process, or the CI worker's filesystem is in a degraded/read-only state. There are no code changes, dependency failures, or capacity signals in the provided evidence, pointing squarely at a transient CI infrastructure condition.\nEvidence sources: []\nEvidence refs: ['FSWriteError in build/test/cassandra/data/system', 'Caused by: java.io.IOException: [rm, -rd, /tmp/cassandra/build/test/cassandra/data/system] returned non-zero exit code: 1', 'stdout: (empty \u2014 no additional error detail from rm)', 'Failure occurs in MockSchema.cleanup() during RepairedDataInfoTest.setUp(), i.e., before any test logic runs', 'CHANGES SUMMARY: (none) \u2014 no recent code changes implicated', 'SIMILAR PAST INCIDENTS: (none)']\nSuggested next step: Re-run the job on a fresh CI worker to determine if the failure is transient. If it reproduces, inspect the CI executor for stale processes holding file locks on /tmp/cassandra/build/test/, check directory ownership/permissions, and verify the filesystem is not mounted read-only or full.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13559297, 13559305, 13559307, 13559310, 13559311, 13559312, 13559314, 13559315, 13559316"
+      ],
+      "u_agent_category": "infrastructure",
+      "u_agent_confidence": "0.82"
+    },
+    {
+      "sys_id": "gitbugs-13559297",
+      "number": "13559297",
+      "short_description": "Test failure: org.apache.cassandra.db.lifecycle.ViewTest",
+      "description": "Fails on both j17_unit_tests and j17_utests_cdc, same error as CASSANDRA-19059\n{code}\nFSWriteError in build/test/cassandra/data/system\n\tat org.apache.cassandra.io.util.PathUtils.propagateUnchecked(PathUtils.java:862)\n\tat org.apache.cassandra.io.util.PathUtils.propagateUnchecked(PathUtils.java:845)\n\tat org.apache.cassandra.io.util.PathUtils.deleteRecursiveUsingNixCommand(PathUtils.java:384)\n\tat org.apache.cassandra.io.util.PathUtils.deleteRecursive(PathUtils.java:402)\n\tat org.apache.cassandra.io.util.File.deleteRecursive(File.java:225)\n\tat org.apache.cassandra.io.util.FileUtils.deleteRecursive(FileUtils.java:678)\n\tat org.apache.cassandra.schema.MockSchema.cleanup(MockSchema.java:377)\n\tat org.apache.cassandra.db.lifecycle.ViewTest.setUp(ViewTest.java:58)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\nCaused by: java.io.IOException: [rm, -rd, /tmp/cassandra/build/test/cassandra/data/system] returned non-zero exit code: 1\nstdout:\n\n\nstderr:\nrm: cannot remove '/tmp/cassandra/build/test/cassandra/data/system/IndexInfo-9f5c6374d48532299a0a5094af9ad1e3': Directory not empty\n\tat org.apache.cassandra.io.util.PathUtils.deleteRecursiveUsingNixCommand(PathUtils.java:377)\n{code}\n\nhttps://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20505/tests",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 09:53:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559294 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559294"
+    },
+    {
+      "sys_id": "gitbugs-13559298",
+      "number": "13559298",
+      "short_description": "Test Failure: org.apache.cassandra.distributed.upgrade.ClusterMetadataUpgradeTest.upgradeWithHintsTest-_jdk11",
+      "description": "Fails in circle with OOM\n\n[https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20534/tests]",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 09:54:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: capacity (confidence 0.55)\nNarrative: The test 'upgradeWithHintsTest' in ClusterMetadataUpgradeTest is failing in CI with an Out-Of-Memory (OOM) error on JDK11. OOM failures in distributed upgrade tests are characteristic of capacity/resource exhaustion rather than a code defect or configuration issue, particularly when running multiple in-process Cassandra nodes (as is common in distributed test frameworks like Harry or dtest-in-JVM). The lack of logs, metrics, changes, or similar past incidents makes it impossible to pinpoint a more specific root cause. The OOM could stem from the test spinning up multiple cluster nodes in-process, hints storage accumulation during the upgrade test, or insufficient heap allocation in the CI environment for JDK11.\nEvidence sources: []\nEvidence refs: ['Test failure reported as OOM (Out-Of-Memory) in CircleCI environment', 'Test class is ClusterMetadataUpgradeTest which runs distributed multi-node in-process Cassandra clusters, known to be memory-intensive', \"Test method is 'upgradeWithHintsTest' which involves hint accumulation and replay, potentially consuming significant heap\", 'Failure is JDK11-specific variant, which may have different GC/heap behavior compared to other JDK variants', 'No code changes reported that would indicate a change-induced failure', 'No logs or metrics provided to identify a specific memory leak or code path']\nSuggested next step: Review CircleCI job resource limits for this executor (heap size, container memory) for the JDK11 variant; compare with JDK17 or other JDK configurations to see if they pass. Collect GC logs and heap dumps from the failing job. Check if increasing -Xmx or reducing in-process node count resolves the failure.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13559299"
+      ],
+      "u_agent_category": "capacity",
+      "u_agent_confidence": "0.55"
+    },
+    {
+      "sys_id": "gitbugs-13559299",
+      "number": "13559299",
+      "short_description": "Test Failure: org.apache.cassandra.distributed.upgrade.ClusterMetadataUpgradeTest.simpleUpgradeTest-_jdk11",
+      "description": "Failed in Circle with OOM\n\n[https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20534/tests]",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 09:55:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559298 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559298"
+    },
+    {
+      "sys_id": "gitbugs-13559305",
+      "number": "13559305",
+      "short_description": "Test failure: j11_jvm_dtests org.apache.cassandra.distributed.test.ring.DecommissionTest#testMixedVersionBlockDecom-_jdk11",
+      "description": "CircleCI Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20503/tests\n\n```org.apache.cassandra.distributed.shared.ShutdownException: Uncaught exceptions were thrown during test\n\tat org.apache.cassandra.distributed.impl.AbstractCluster.checkAndResetUncaughtExceptions(AbstractCluster.java:1124)\n\tat org.apache.cassandra.distributed.impl.AbstractCluster.close(AbstractCluster.java:1110)\n\tat org.apache.cassandra.distributed.test.ring.DecommissionTest.testMixedVersionBlockDecom(DecommissionTest.java:171)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tSuppressed: java.util.concurrent.RejectedExecutionException: GossipStage has shut down\n\t\tat org.apache.cassandra.concurrent.ThreadPoolExecutorBase.lambda$static$0(ThreadPoolExecutorBase.java:49)\n\t\tat org.apache.cassandra.concurrent.ThreadPoolExecutorJMXAdapter.lambda$rejectedExecutionHandler$0(ThreadPoolExecutorJMXAdapter.java:238)\n\t\tat java.base/java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:825)\n\t\tat java.base/java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1355)\n\t\tat org.apache.cassandra.concurrent.ThreadPoolExecutorPlus.addTask(ThreadPoolExecutorPlus.java:50)\n\t\tat org.apache.cassandra.concurrent.ThreadPoolExecutorPlus.execute(ThreadPoolExecutorPlus.java:57)\n\t\tat org.apache.cassandra.concurrent.Stage.execute(Stage.java:127)\n\t\tat org.apache.cassandra.gms.Gossiper.runInGossipStageBlocking(Gossiper.java:467)\n\t\tat org.apache.cassandra.tcm.compatibility.GossipHelper.removeFromGossip(GossipHelper.java:100)\n\t\tat org.apache.cassandra.tcm.listeners.LegacyStateListener.notifyPostCommit(LegacyStateListener.java:122)\n\t\tat org.apache.cassandra.tcm.log.LocalLog.lam",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:06:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559294 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559294"
+    },
+    {
+      "sys_id": "gitbugs-13559308",
+      "number": "13559308",
+      "short_description": "Test failure: org.apache.cassandra.distributed.test.log.InProgressSequenceCoordinationTest.rejectSubsequentInProgressSequence",
+      "description": "CircleCI failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20464/tests\n\n```\njunit.framework.AssertionFailedError: Timeout occurred. Please note the time in the report does not reflect the time until the timeout.\n\tat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.base/java.util.Vector.forEach(Vector.java:1394)\n\tat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.base/java.util.Vector.forEach(Vector.java:1394)\n\tat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat jdk.internal.reflect.GeneratedMethodAccessor47.invoke(Unknown Source)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.base/java.util.Vector.forEach(Vector.java:1394)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat org.apache.cassandra.anttasks.TestHelper.execute(TestHelper.java:53)\n\tat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.base/java.util.Vector.forEach(Vector.java:1394)\n\tat jdk.internal.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:07:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: unknown (confidence 0.35)\nNarrative: The incident is a test timeout in a distributed Cassandra test (InProgressSequenceCoordinationTest.rejectSubsequentInProgressSequence). The failure manifests as a JUnit timeout with no logs, no metrics, no recent changes, and no similar past incidents provided. Timeouts in distributed in-JVM cluster tests can stem from many causes: a genuine code defect (deadlock, livelock, missing notification), flaky test infrastructure (CI resource starvation, JVM GC pause), or a pre-existing race condition. Without logs or a reproducible pattern, the root cause cannot be determined from the available evidence alone.\nEvidence sources: []\nEvidence refs: ['junit.framework.AssertionFailedError: Timeout occurred \u2014 test exceeded its configured time limit', 'Test class: org.apache.cassandra.distributed.test.log.InProgressSequenceCoordinationTest.rejectSubsequentInProgressSequence \u2014 distributed in-JVM cluster test involving sequence coordination logic', 'No logs summary provided', 'No metrics summary provided', 'No changes summary provided', 'No similar past incidents provided', 'Single CircleCI run with no indication of repeated failure']\nSuggested next step: Re-run the test in isolation to determine reproducibility; if it reproduces, capture thread dumps at the point of timeout to identify whether a deadlock, livelock, or stalled barrier is present in the sequence coordination logic.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13559313\nRouted to human triage (low confidence or no evidence)."
+      ]
+    },
+    {
+      "sys_id": "gitbugs-13559307",
+      "number": "13559307",
+      "short_description": "Test failure: org.apache.cassandra.distributed.test.ClearSnapshotTest#clearSnapshotSlowTest-_jdk11",
+      "description": "CircleCI failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20464/tests\n\nAlso on jdk17: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20500/tests\n\n```\njava.lang.RuntimeException: java.util.concurrent.TimeoutException\n\tat org.apache.cassandra.utils.Throwables.maybeFail(Throwables.java:79)\n\tat org.apache.cassandra.utils.FBUtilities.waitOnFutures(FBUtilities.java:537)\n\tat org.apache.cassandra.distributed.impl.AbstractCluster.close(AbstractCluster.java:1098)\n\tat org.apache.cassandra.distributed.test.ClearSnapshotTest.clearSnapshotSlowTest(ClearSnapshotTest.java:124)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\nCaused by: java.util.concurrent.TimeoutException\n\tat org.apache.cassandra.utils.concurrent.AbstractFuture.get(AbstractFuture.java:253)\n\tat org.apache.cassandra.utils.FBUtilities.waitOnFutures(FBUtilities.java:529)\n\tSuppressed: java.util.concurrent.TimeoutException\n```\n",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:07:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559294 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559294"
+    },
+    {
+      "sys_id": "gitbugs-13559309",
+      "number": "13559309",
+      "short_description": "Test failure: org.apache.cassandra.distributed.test.log.FetchLogFromPeersTest.catchupCoordinatorAheadPlacementsReadTest-_jdk11",
+      "description": "CircleCI failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20464/tests\n\nAlso failing on 17: Circleci Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20500/tests\n\n{code}\njunit.framework.AssertionFailedError\n\tat org.apache.cassandra.distributed.test.log.FetchLogFromPeersTest.catchupCoordinatorAheadPlacementsReadTest(FetchLogFromPeersTest.java:217)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n{code}\n",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:08:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: unknown (confidence 0.35)\nNarrative: The incident is a test failure in FetchLogFromPeersTest.catchupCoordinatorAheadPlacementsReadTest on both JDK 11 and JDK 17. The failure manifests as a bare AssertionFailedError at line 217 with no descriptive message, no logs, no metrics, no recent changes, and no similar past incidents to reference. Without log output, stack context beyond the assertion site, or change history, it is impossible to determine whether this is a flaky distributed-test (infrastructure/timing), a code defect, or a data/config issue. The dual-JDK reproduction slightly reduces the likelihood of a JVM-specific infrastructure issue but does not narrow the root cause further.\nEvidence sources: []\nEvidence refs: ['junit.framework.AssertionFailedError at FetchLogFromPeersTest.java:217 with no assertion message', 'Failure reproduced on both JDK 11 (job 20464) and JDK 17 (job 20500) in the same workflow run', 'No logs summary provided', 'No metrics summary provided', 'No changes summary provided', 'No similar past incidents recorded']\nSuggested next step: Retrieve the full CircleCI test output (stdout/stderr) for both jobs to capture any Cassandra node logs, exception messages, or timing data emitted before the assertion failure; also inspect FetchLogFromPeersTest.java line 217 and surrounding context to understand what condition is being asserted and whether it is known to be flaky under load.\nPII redactions applied to evidence: 0\nRouted to human triage (low confidence or no evidence)."
+      ]
+    },
+    {
+      "sys_id": "gitbugs-13559310",
+      "number": "13559310",
+      "short_description": "Test failure: org.apache.cassandra.distributed.test.log.RegisterTest#serializationVersionDisagreementTest-_jdk17",
+      "description": "Circleci Failure: [https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20502/tests]\n\n{code}\norg.apache.cassandra.distributed.test.log.RegisterTest.lambda$serializationVersionDisagreementTest$81c80a4a$2(RegisterTest.java:132)\nat org.apache.cassandra.concurrent.FutureTask$1.call(FutureTask.java:96)\nat org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)\nat org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)\nat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)\nat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)\nat io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\nat java.base/java.lang.Thread.run(Thread.java:833)\nCaused by: java.lang.NoSuchFieldException: modifiers\nat java.base/java.lang.Class.getDeclaredField(Class.java:2610)\nat org.apache.cassandra.distributed.test.log.RegisterTest.lambda$serializationVersionDisagreementTest$81c80a4a$2(RegisterTest.java:120)\n{code}",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:09:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559294 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559294"
+    },
+    {
+      "sys_id": "gitbugs-13559311",
+      "number": "13559311",
+      "short_description": "Test Failure: org.apache.cassandra.distributed.test.ring.DecommissionTest#testMixedVersionBlockDecom-_jdk17",
+      "description": "Circleci Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20502/tests\n\n\n```\norg.apache.cassandra.distributed.shared.ShutdownException: Uncaught exceptions were thrown during test\n\tat org.apache.cassandra.distributed.impl.AbstractCluster.checkAndResetUncaughtExceptions(AbstractCluster.java:1124)\n\tat org.apache.cassandra.distributed.impl.AbstractCluster.close(AbstractCluster.java:1110)\n\tat org.apache.cassandra.distributed.test.ring.DecommissionTest.testMixedVersionBlockDecom(DecommissionTest.java:171)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tSuppressed: java.util.concurrent.RejectedExecutionException: GossipStage has shut down\n\t\tat org.apache.cassandra.concurrent.ThreadPoolExecutorBase.lambda$static$0(ThreadPoolExecutorBase.java:49)\n\t\tat org.apache.cassandra.concurrent.ThreadPoolExecutorJMXAdapter.lambda$rejectedExecutionHandler$0(ThreadPoolExecutorJMXAdapter.java:238)\n\t\tat java.base/java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:833)\n\t\tat java.base/java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1365)\n\t\tat org.apache.cassandra.concurrent.ThreadPoolExecutorPlus.addTask(ThreadPoolExecutorPlus.java:50)\n\t\tat org.apache.cassandra.concurrent.ThreadPoolExecutorPlus.execute(ThreadPoolExecutorPlus.java:57)\n\t\tat org.apache.cassandra.concurrent.Stage.execute(Stage.java:127)\n\t\tat org.apache.cassandra.gms.Gossiper.runInGossipStageBlocking(Gossiper.java:467)\n\t\tat org.apache.cassandra.tcm.compatibility.GossipHelper.removeFromGossip(GossipHelper.java:100)\n\t\tat org.apache.cassandra.tcm.listeners.LegacyStateListener.notifyPostCommit(LegacyStateListener.java:122)\n\t\tat org.apache.cassandra.tcm.log.LocalLog.l",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:10:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559294 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559294"
+    },
+    {
+      "sys_id": "gitbugs-13559313",
+      "number": "13559313",
+      "short_description": "Test failure: org.apache.cassandra.distributed.test.log.InProgressSequenceCoordinationTest:rejectSubsequentInProgressSequence",
+      "description": "Circleci Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20500/tests\n\nAlso fais on jdk11: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20464/tests\n{code}\n junit.framework.AssertionFailedError: Timeout occurred. Please note the time in the report does not reflect the time until the timeout.\n at jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n at java.base/java.util.Vector.forEach(Vector.java:1365)\n at jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n at jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n at java.base/java.util.Vector.forEach(Vector.java:1365)\n at jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n at jdk.internal.reflect.GeneratedMethodAccessor47.invoke(Unknown Source)\n at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n at java.base/java.util.Vector.forEach(Vector.java:1365)\n at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n at org.apache.cassandra.anttasks.TestHelper.execute(TestHelper.java:53)\n at jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source)\n at java.base/jdk.inte",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:12:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559308 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559308"
+    },
+    {
+      "sys_id": "gitbugs-13559312",
+      "number": "13559312",
+      "short_description": "Test failure: org.apache.cassandra.distributed.test.ClearSnapshotTest.clearSnapshotSlowTest-_jdk17",
+      "description": "Circleci Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20500/tests\n\nAlso on jdk11: CircleCI failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20464/tests\n\n ```\n java.lang.RuntimeException: java.util.concurrent.TimeoutException\n  at org.apache.cassandra.utils.Throwables.maybeFail(Throwables.java:79)\n  at org.apache.cassandra.utils.FBUtilities.waitOnFutures(FBUtilities.java:537)\n  at org.apache.cassandra.distributed.impl.AbstractCluster.close(AbstractCluster.java:1098)\n  at org.apache.cassandra.distributed.test.ClearSnapshotTest.clearSnapshotSlowTest(ClearSnapshotTest.java:124)\n  at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n  at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n  at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n  Caused by: java.util.concurrent.TimeoutException\n  at org.apache.cassandra.utils.concurrent.AbstractFuture.get(AbstractFuture.java:253)\n  at org.apache.cassandra.utils.FBUtilities.waitOnFutures(FBUtilities.java:529)\n  Suppressed: java.util.concurrent.TimeoutException\n```\n",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:12:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559294 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559294"
+    },
+    {
+      "sys_id": "gitbugs-13559314",
+      "number": "13559314",
+      "short_description": "Test failure: org.apache.cassandra.distributed.test.log.RegisterTest.serializationVersionDisagreementTest-_jdk17",
+      "description": "Circleci Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20500/tests\n\n```\n java.lang.RuntimeException: java.lang.NoSuchFieldException: modifiers\n at org.apache.cassandra.distributed.test.log.RegisterTest.lambda$serializationVersionDisagreementTest$81c80a4a$2(RegisterTest.java:132)\n at org.apache.cassandra.concurrent.FutureTask$1.call(FutureTask.java:96)\n at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)\n at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)\n at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)\n at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)\n at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n at java.base/java.lang.Thread.run(Thread.java:833)\n Caused by: java.lang.NoSuchFieldException: modifiers\n at java.base/java.lang.Class.getDeclaredField(Class.java:2610)\n at org.apache.cassandra.distributed.test.log.RegisterTest.lambda$serializationVersionDisagreementTest$81c80a4a$2(RegisterTest.java:120)\n```\n",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:13:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559294 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559294"
+    },
+    {
+      "sys_id": "gitbugs-13559315",
+      "number": "13559315",
+      "short_description": "Test failure: org.apache.cassandra.distributed.test.ring.DecommissionTest.test*Version*",
+      "description": "Circleci Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20500/tests\nAlso: Circleci Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20502/tests\nAlso: CircleCI Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20503/tests\n\n\n```\n org.apache.cassandra.distributed.shared.ShutdownException: Uncaught exceptions were thrown during test\n at org.apache.cassandra.distributed.impl.AbstractCluster.checkAndResetUncaughtExceptions(AbstractCluster.java:1124)\n at org.apache.cassandra.distributed.impl.AbstractCluster.close(AbstractCluster.java:1110)\n at org.apache.cassandra.distributed.test.ring.DecommissionTest.testMixedVersionBlockDecom(DecommissionTest.java:171)\n at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n Suppressed: java.util.concurrent.RejectedExecutionException: GossipStage has shut down\n at org.apache.cassandra.concurrent.ThreadPoolExecutorBase.lambda$static$0(ThreadPoolExecutorBase.java:49)\n at org.apache.cassandra.concurrent.ThreadPoolExecutorJMXAdapter.lambda$rejectedExecutionHandler$0(ThreadPoolExecutorJMXAdapter.java:238)\n at java.base/java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:833)\n at java.base/java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1365)\n at org.apache.cassandra.concurrent.ThreadPoolExecutorPlus.addTask(ThreadPoolExecutorPlus.java:50)\n at org.apache.cassandra.concurrent.ThreadPoolExecutorPlus.execute(ThreadPoolExecutorPlus.java:57)\n at org.apache.cassandra.concurrent.Stage.execute(Stage.java:127)\n at org.apache.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:14:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559294 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559294"
+    },
+    {
+      "sys_id": "gitbugs-13559316",
+      "number": "13559316",
+      "short_description": "Test failure: org.apache.cassandra.distributed.test.log.FetchLogFromPeersTest.catchupCoordinatorAheadPlacementsReadTest-_jdk17",
+      "description": "Circleci Failure: https://app.circleci.com/pipelines/github/michaelsembwever/cassandra/256/workflows/c4fda8f1-a8d6-4523-be83-5e30b9de39fe/jobs/20500/tests\n\n```\n junit.framework.AssertionFailedError\n at org.apache.cassandra.distributed.test.log.FetchLogFromPeersTest.catchupCoordinatorAheadPlacementsReadTest(FetchLogFromPeersTest.java:217)\n at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n```",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-24 10:15:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13559294 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13559294"
+    },
+    {
+      "sys_id": "gitbugs-13560036",
+      "number": "13560036",
+      "short_description": "Test failure: ConsistentMoveTest#moveTest-cassandra.testtag_IS_UNDEFINED",
+      "description": "{code}\nTimeout occurred. Please note the time in the report does not reflect the time until the timeout. \n\njunit.framework.AssertionFailedError: Timeout occurred. Please note the time in the report does not reflect the time until the timeout. \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat java.base/java.util.Vector.forEach(Vector.java:1394) \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat java.base/java.util.Vector.forEach(Vector.java:1394) \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) \nat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat java.base/java.util.Vector.forEach(Vector.java:1394) \nat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) \nat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat org.apache.cassandra.anttasks.TestHelper.execute(TestHelper.java:53) \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat java.base/jav",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-30 09:38:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: unknown (confidence 0.35)\nNarrative: The incident is a test timeout in ConsistentMoveTest#moveTest for Cassandra. The only evidence is a JUnit timeout assertion error with a generic stack trace terminating in TestHelper.execute(). There are no logs, metrics, or recent changes provided, and no similar past incidents to reference. The timeout could stem from a variety of root causes: a deadlock or livelock in the move/token reassignment logic (code-defect), a slow or unavailable Cassandra node/cluster (infrastructure or capacity), a flaky test environment, or a recently introduced regression (change-induced). Without additional diagnostic data it is not possible to confidently assign a specific category.\nEvidence sources: []\nEvidence refs: ['junit.framework.AssertionFailedError: Timeout occurred \u2014 test did not complete within the allotted time window', 'ConsistentMoveTest#moveTest-cassandra.testtag_IS_UNDEFINED \u2014 the failing test exercises consistent token move logic in Cassandra', 'Stack trace terminates at org.apache.cassandra.anttasks.TestHelper.execute(TestHelper.java:53) \u2014 timeout enforced by the Ant test harness, not a JVM crash', 'No logs, metrics, or change records provided \u2014 insufficient context to distinguish infrastructure, code, or environment cause']\nSuggested next step: Retrieve full test output and Cassandra node logs for the test run (gc.log, system.log, debug.log) to identify whether the timeout is caused by a deadlock, slow ring operation, resource exhaustion, or environment instability. Re-run the test in isolation with verbose logging enabled (-Dcassandra.test.loglevel=DEBUG) and compare timing against a known-good baseline.\nPII redactions applied to evidence: 0\nRouted to human triage (low confidence or no evidence)."
+      ]
+    },
+    {
+      "sys_id": "gitbugs-13560037",
+      "number": "13560037",
+      "short_description": "Test failure:  ConsistentBootstrapTest#coordinatorIsBehindTest",
+      "description": "{code}\nForked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit. \n\njunit.framework.AssertionFailedError: Forked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit. \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat java.base/java.util.Vector.forEach(Vector.java:1394) \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat java.base/java.util.Vector.forEach(Vector.java:1394) \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) \nat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat java.base/java.util.Vector.forEach(Vector.java:1394) \nat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) \nat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) \nat org.apache.cassandra.anttasks.TestHelper.execute(TestHelper.java:53) \nat jdk.internal.reflect.GeneratedMethodAccessor4.invoke(Unknown Source) \nat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccesso",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2023-11-30 09:39:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: unknown (confidence 0.35)\nNarrative: The test ConsistentBootstrapTest#coordinatorIsBehindTest failed because the forked JVM exited abnormally. This type of failure (forked JVM crash/abnormal exit) can stem from many root causes: an OOM error, a JVM crash, a native code fault, a test-level code defect, infrastructure instability, or an environmental issue. The stack trace provided is from the Surefire/Ant test runner machinery (TestHelper, Vector.forEach, reflection) and does not reach any application or test code \u2014 meaning the actual cause of the abnormal JVM exit is not captured in the provided evidence. There are no logs, metrics, or change records to further narrow down the root cause.\nEvidence sources: []\nEvidence refs: ['junit.framework.AssertionFailedError: Forked Java VM exited abnormally \u2014 indicates the child JVM process terminated unexpectedly without a clean exit', 'Stack trace terminates in org.apache.cassandra.anttasks.TestHelper.execute and JDK reflection/Vector internals \u2014 no application or test code frames visible, so the actual failure site is unknown', 'No logs summary provided \u2014 absence of JVM crash log, hs_err, OOM message, or stderr output prevents diagnosis', 'No metrics summary provided \u2014 cannot assess memory pressure, CPU saturation, or resource exhaustion', 'No changes summary provided \u2014 cannot attribute to a recent code or config change', 'No similar past incidents provided \u2014 cannot correlate with known flaky patterns for this test']\nSuggested next step: Retrieve the full test output including stderr, any hs_err_pid*.log JVM crash dump, and surefire report XML for the failed run. Also check available heap configured for the forked JVM (-Xmx) and whether the host experienced memory pressure at the time of the failure.\nPII redactions applied to evidence: 0\nRouted to human triage (low confidence or no evidence)."
+      ]
+    },
+    {
+      "sys_id": "gitbugs-13598479",
+      "number": "13598479",
+      "short_description": "AbstractCommitLogService#lastSyncedAt initialized with currentTimeMillis() but later compared and updated with System.nanoTime() ",
+      "description": "Within org.apache.cassandra.db.commitlog.AbstractCommitLogService\n\nwe use System.currentMillis()-based time to initialize lastSyncedAt field:\n{code:java}\nprotected volatile long lastSyncedAt = currentTimeMillis();{code}\nbut later we use clock.now() = System.nanoTime() to compare and update the field value:\n{code:java}\nlong pollStarted = clock.now();\nboolean flushToDisk = lastSyncedAt + syncIntervalNanos <= pollStarted || state != NORMAL || syncRequested; {code}\n\nAs of now we are lucky that in the current JDK implementation  System.nanoTime()  is much bigger than currentTimeMillis() but it is not guaranteed.",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2024-11-12 13:12:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Automated triage\nCategory: code-defect (confidence 0.97)\nNarrative: The root cause is a unit mismatch bug in AbstractCommitLogService. The field `lastSyncedAt` is initialized using `System.currentTimeMillis()` (epoch milliseconds, typically ~1.7\u00d710\u00b9\u00b2 ms since 1970) but is subsequently read and written using `clock.now()` which wraps `System.nanoTime()` (nanoseconds since JVM start, typically a much smaller or arbitrarily-signed long). The comparison `lastSyncedAt + syncIntervalNanos <= pollStarted` is therefore semantically undefined: the two operands have incompatible origins and units. The current JDK behavior (where nanoTime values happen to be large positive longs greater than currentTimeMillis values) masks the bug, but this is not guaranteed by the JVM specification. On JVMs where nanoTime starts near zero or is negative, `lastSyncedAt` would always be greater than `pollStarted`, meaning `flushToDisk` could never become true via the time condition, stalling commit-log syncing indefinitely until a shutdown or manual sync request.\nEvidence sources: []\nEvidence refs: ['lastSyncedAt initialized with currentTimeMillis(): `protected volatile long lastSyncedAt = currentTimeMillis();`', 'lastSyncedAt compared with clock.now() = System.nanoTime(): `long pollStarted = clock.now(); boolean flushToDisk = lastSyncedAt + syncIntervalNanos <= pollStarted ...`', 'Units are incompatible: currentTimeMillis() returns wall-clock milliseconds since epoch; System.nanoTime() returns nanoseconds since an arbitrary JVM-internal origin', 'No JVM specification guarantee that nanoTime() > currentTimeMillis()', 'No changes, log anomalies, or external dependency failures reported \u2014 purely an internal logic defect']\nSuggested next step: Change the initializer of `lastSyncedAt` to use `clock.now()` (i.e., `System.nanoTime()`) so that the field is consistently in the same unit and epoch as all subsequent reads/writes, then audit all other reads of `lastSyncedAt` for any external exposure that assumes wall-clock milliseconds.\nPII redactions applied to evidence: 0\nDuplicates consolidated: 13598480",
+        "[triage-agent] Fix suggestion: out_eval/fix_13598479.md"
+      ],
+      "u_agent_category": "code-defect",
+      "u_agent_confidence": "0.97"
+    },
+    {
+      "sys_id": "gitbugs-13598480",
+      "number": "13598480",
+      "short_description": "AbstractCommitLogService#lastSyncedAt initialized with currentTimeMillis() but later compared and updated with System.nanoTime() ",
+      "description": "Within org.apache.cassandra.db.commitlog.AbstractCommitLogService\n\nwe use System.currentMillis()-based time to initialize lastSyncedAt field:\n{code:java}\nprotected volatile long lastSyncedAt = currentTimeMillis();{code}\nbut later we use clock.now() = System.nanoTime() to compare and update the field value:\n{code:java}\nlong pollStarted = clock.now();\nboolean flushToDisk = lastSyncedAt + syncIntervalNanos <= pollStarted || state != NORMAL || syncRequested; {code}\nAs of now we are lucky that in the current JDK implementations System.nanoTime() is much bigger than currentTimeMillis() but it is not guaranteed by a specification of the API. If\u00a0 nanoTime() < currentTimeMillis() then we can stuck without sync of commit log to disk.\n\nSo, we need to align the time sources and change the init logic to:\n{code:java}\nprotected volatile long lastSyncedAt = preciseTime.now();{code}",
+      "cmdb_ci": "cassandra",
+      "priority": "3",
+      "severity": "3",
+      "state": "New",
+      "opened_at": "2024-11-12 13:12:00",
+      "assignment_group": "eval",
+      "work_notes": [
+        "[triage-agent] Probable duplicate of 13598479 (same service + error signature within 30 min). Investigation consolidated there."
+      ],
+      "u_related_incident": "13598479"
+    }
+  ]
+}

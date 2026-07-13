@@ -5,3 +5,5 @@ out/
 venv/
 .pytest_cache/
 .DS_Store
+data_eval/
+out_eval/
